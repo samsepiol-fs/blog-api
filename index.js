@@ -2,6 +2,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import blogRouter from './routes/blog.route.js';
+import authRouter from './routes/auth.route.js';
 dotenv.config();
 
 const app = express();
@@ -20,6 +21,7 @@ app.listen(port, () => {
 });
 
 app.use(`/api/blog`, blogRouter);
+app.use(`/api/auth`, authRouter);
 
 app.use((err, req, res, next) => {
     const statusCode = err.statusCode || 500;
