@@ -2,12 +2,9 @@ import BlogPost from '../models/blog.model.js';
 import { errorHandler } from '../utils/error.js';
 
 export const createBlog = async (req, res, next) => {
-    const { title, content, author } = req.body;
-    const blogPost = new BlogPost({ title, content, author});
-
     try {
-        await blogPost.save();
-        res.status(200).json('Blog created successfully!');
+        const blog = await BlogPost.create(req.body);
+        res.status(200).json(blog);
     } catch (error) {
         next(error);
     }
@@ -42,6 +39,9 @@ export const deleteBlog = async (req, res, next) => {
     if(!blog) {
         return next(errorHandler(404, "Blog not found!"));
     }
+    if(req.user.id !== blog.userRef){
+        return next(errorHandler(401, 'You can only delete your own blog!'));
+    }
     try {
         await BlogPost.findByIdAndDelete(req.params.id);
         res.status(200).json("Blog has been deleted successfully!");
@@ -54,6 +54,9 @@ export const updateBlog = async (req, res, next) => {
     const blog = await BlogPost.findById(req.params.id);
     if(!blog) {
         return next(errorHandler(404, "Blog not found!"));
+    }
+    if(req.user.id !== blog.userRef) {
+        return next(errorHandler(401, "You can only update your own blog!"));
     }
     try {
         const updatedBlog = await BlogPost.findByIdAndUpdate(
